@@ -36,4 +36,4 @@ const cambiarEstado = async (codigo_orden, estado) => {
     }
 }
 
-cambiarEstado(62, 'COMPLETADO');
+// cambiarEstado(62, 'COMPLETADO');
