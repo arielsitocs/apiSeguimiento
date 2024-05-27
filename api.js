@@ -1,26 +1,31 @@
+import express from 'express';
+import cors from 'cors';
 import { conectarBaseDatos } from './conexion.js';
 import { getOrdenes } from './ordenes.js';
 
+const app = express();
+app.use(express.json());
+app.use(cors())
+
+const ordenes = [];
+
 const cambiarEstado = async (codigo_orden, estado) => {
     const connection = await conectarBaseDatos();
-    const ordenes = await getOrdenes();
-    
+    ordenes = await getOrdenes();
+
     try {
         for (const orden of ordenes) {
-            if (orden[0] === codigo_orden) {
+            if (orden[0] == codigo_orden) {
                 const update = await connection.execute(
                     'UPDATE orden SET estado = :estado WHERE cod_orden = :codigo_orden',
                     { estado, codigo_orden },
                     { autoCommit: true }
                 );
-        
+
                 console.log(`Estado de la orden ${codigo_orden} cambiado a ${estado}.`);
-                return update;
-            }
+            } 
         }
-        
-        console.log('No se encontró una orden con el número:', codigo_orden);
-        return null;
+
     } catch (error) {
         console.error('Error al cambiar el estado de la orden:', error);
         throw error;
@@ -28,7 +33,6 @@ const cambiarEstado = async (codigo_orden, estado) => {
         if (connection) {
             try {
                 await connection.close();
-                console.log('Conexión cerrada');
             } catch (error) {
                 console.error('Error al cerrar la conexión:', error);
             }
@@ -36,4 +40,20 @@ const cambiarEstado = async (codigo_orden, estado) => {
     }
 }
 
-cambiarEstado(62, 'COMPLETADO');
+app.post('/cambiar-estado', async (req, res) => {
+    const { codigo_orden, estado } = req.body;
+
+    try {
+        await cambiarEstado(codigo_orden, estado);
+
+        res.json({ success: true, message: `Estado de la orden ${codigo_orden} cambiado a ${estado}`, ordenes });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Hubo un error al cambiar el estado de la orden' });
+    }
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Servidor ejecutándose en el puerto http://localhost:${PORT}`);
+});
+

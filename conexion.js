@@ -7,7 +7,6 @@ async function conectarBaseDatos() {
             password: 'sportfit',
             connectString: 'localhost:1521/orcl'
         });
-        console.log("Conexión establecida");
         return connection;
     } catch(err) {
         console.error("Error al conectar a Oracle: " + err);
