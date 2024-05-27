@@ -15,7 +15,6 @@ async function getOrdenes() {
         if (connection) {
             try {
                 await connection.close();
-                console.log('Conexión cerrada');
             } catch (err) {
                 console.error('Error al cerrar la conexión :', err);
             }
